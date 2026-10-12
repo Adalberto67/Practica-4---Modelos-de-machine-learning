@@ -13,4 +13,6 @@ Archivos:
 
 Ejecutar en una computadora: `pip install -r requirements.txt` y luego `streamlit run app.py`.
 
-Alumno: Adalberto Enai Pech Us · Sistemas Inteligentes. Código generado con apoyo de IA (Claude, Anthropic).
+Alumno: Adalberto Enai Pech Us
+
+Sistemas Inteligentes.
