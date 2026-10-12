@@ -1,0 +1,8 @@
+streamlit
+tensorflow-cpu
+scikit-learn
+pandas
+numpy
+matplotlib
+jinja2
+ucimlrepo
