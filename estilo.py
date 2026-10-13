@@ -1,5 +1,4 @@
 """Estilos visuales de la página: CSS, tablas con formato y tarjetas de resultado."""
-import matplotlib.pyplot as plt
 import pandas as pd
 
 AZUL, AZUL_OSC = "#2E5AA8", "#1F3B73"
@@ -36,6 +35,13 @@ h1, h2, h3 {letter-spacing: -0.01em;}
 .barra .lleno {height: 12px; border-radius: 999px;}
 .barra .marca {position: absolute; top: -5px; width: 3px; height: 22px; background: #101828;}
 .nota {font-size: .82rem; color: #667085;}
+.stTabs [data-baseweb="tab-list"] {gap: 6px; background: #EAF0F9; padding: 6px; border-radius: 12px;
+  width: fit-content; margin: 8px 0 18px 0;}
+.stTabs [data-baseweb="tab"] {height: 40px; padding: 0 22px; border-radius: 9px; background: transparent;
+  color: #475467; font-weight: 600;}
+.stTabs [data-baseweb="tab"] p {font-size: 0.95rem; font-weight: 600;}
+.stTabs [aria-selected="true"] {background: #FFFFFF; color: #1F3B73; box-shadow: 0 1px 3px rgba(16,24,40,.14);}
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {display: none;}
 </style>
 """
 
@@ -76,14 +82,13 @@ def veredicto(titulo, valor, detalle, tono):
             f'<div class="t">{titulo}</div><div class="v">{valor}</div><div>{detalle}</div></div>')
 
 
-def barra(valor, marca=None, color="#2E5AA8"):
-    """Barra de 0 a 1 con una marca opcional (por ejemplo, el umbral de decisión)."""
-    m = f'<div class="marca" style="left:calc({marca * 100:.1f}% - 1px)"></div>' if marca is not None else ""
+def barra(valor, marcas=None, color="#2E5AA8"):
+    """Barra de 0 a 1 con marcas opcionales (por ejemplo, los umbrales de riesgo)."""
+    if marcas is None:
+        marcas = []
+    elif not isinstance(marcas, (list, tuple)):
+        marcas = [marcas]
+    m = "".join(f'<div class="marca" style="left:calc({x * 100:.1f}% - 1px)"></div>' for x in marcas)
     return (f'<div class="barra"><div class="lleno" style="width:{valor * 100:.1f}%; background:{color}"></div>'
             f'{m}</div>')
 
-
-def estilo_graficas():
-    plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False, "axes.spines.right": False,
-                         "axes.grid": True, "grid.alpha": 0.25, "axes.titleweight": "bold",
-                         "axes.titlesize": 11, "font.size": 9, "legend.frameon": False})

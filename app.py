@@ -9,18 +9,15 @@ Ejecutar localmente:  streamlit run app.py
 import threading
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
-from sklearn.metrics import RocCurveDisplay
-
 import estilo as es
+import graficas as gr
 import redes
 
-st.set_page_config(page_title="Práctica 4 · Redes neuronales", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Práctica 4 · Redes neuronales", layout="wide")
 st.markdown(es.CSS, unsafe_allow_html=True)
-es.estilo_graficas()
 
 
 # ------------------------------------------------------------------ Modelos compartidos
@@ -40,7 +37,8 @@ REDES = {
             dataset="AI4I 2020 Predictive Maintenance · UCI (10,000 registros, 3.4 % con falla)",
             url="https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset",
             red="Perceptrón multicapa 8 → 64 → 32 → 1 (salida sigmoide)",
-            referencia="En Colab: ROC-AUC = 0.975 · exactitud = 0.972"),
+            referencia="En Colab: ROC-AUC = 0.975 · exactitud = 0.972",
+            colab="https://colab.research.google.com/drive/1R-M4y-RtuAnrMwkMBOvXB1d4wmoI7CUd?usp=sharing"),
     2: dict(menu="2 · Regresión", tipo="Ajuste de funciones · Regresión",
             titulo="¿Cuánta energía generará la planta?", funcion=redes.entrenar_regresion, tiempo="1 a 3 minutos",
             problema="Planta eléctrica de ciclo combinado. A partir de las condiciones ambientales, la red estima "
@@ -48,7 +46,8 @@ REDES = {
             dataset="Combined Cycle Power Plant · UCI (9,568 registros horarios reales)",
             url="https://archive.ics.uci.edu/dataset/294/combined+cycle+power+plant",
             red="Perceptrón multicapa 4 → 64 → 64 → 1 (salida lineal)",
-            referencia="En Colab: R² = 0.945 · error medio = 2.90 MW"),
+            referencia="En Colab: R² = 0.945 · error medio = 2.90 MW",
+            colab="https://colab.research.google.com/drive/1zwuJx0JELanmcuH73oSe00h5DZCK-xvk?usp=sharing"),
     3: dict(menu="3 · Series de tiempo", tipo="Series de tiempo · Clasificación de secuencias",
             titulo="¿En qué estado está la válvula?", funcion=redes.entrenar_series, tiempo="3 a 8 minutos",
             problema="Monitoreo de condición de un sistema hidráulico. La red analiza cómo evolucionan 9 sensores "
@@ -56,7 +55,8 @@ REDES = {
             dataset="Condition Monitoring of Hydraulic Systems · UCI (2,205 ciclos de un banco de pruebas real)",
             url="https://archive.ics.uci.edu/dataset/447/condition+monitoring+of+hydraulic+systems",
             red="Convolucional 1D (32-64-64) + LSTM (64) → 4 estados (softmax)",
-            referencia="En Colab: exactitud = 0.988 · F1 promedio = 0.985"),
+            referencia="En Colab: exactitud = 0.988 · F1 promedio = 0.985",
+            colab="https://colab.research.google.com/drive/14Bjxd9KFZI_FMcAOhLguCYrVanAJawsy?usp=sharing"),
 }
 PARAMETROS = {
     1: {"Capas ocultas": "64 y 32 neuronas (ReLU)", "Dropout": "0.2", "Optimizador": "Adam (tasa 0.001)",
@@ -85,8 +85,8 @@ def tabla_simple(diccionario, c1, c2, titulo):
 
 # ------------------------------------------------------------------ Barra lateral
 with st.sidebar:
-    st.markdown("### 🧠 Práctica 4")
-    st.caption("Modelos de machine learning · Sistemas Inteligentes")
+    st.markdown("### Práctica 4")
+    st.caption("Modelos de Machine Learning")
     pagina = st.radio("Ir a", ["Inicio"] + [r["menu"] for r in REDES.values()], label_visibility="collapsed")
     st.divider()
     st.markdown("**Estado de las redes**")
@@ -117,7 +117,9 @@ def pagina_inicio():
                 <span class="chip" style="background:{es.COLOR[k]}1A; color:{es.COLOR[k]}">{r['tipo'].split(' · ')[-1]}</span><br>
                 <span class="num" style="background:{es.COLOR[k]}">{k}</span><h4>{r['titulo']}</h4>
                 <p>{r['problema']}</p><p><b>Red:</b> {r['red']}</p>
-                <p class="nota">Datos: {r['dataset']}</p></div>""", unsafe_allow_html=True)
+                <p class="nota">Datos: {r['dataset']}</p>
+                <p><a href="{r['colab']}" target="_blank">Abrir cuaderno en Colab ↗</a></p></div>""",
+                        unsafe_allow_html=True)
 
     with st.expander("Detalles del procedimiento"):
         st.markdown(
@@ -132,10 +134,15 @@ def pagina_inicio():
 # ------------------------------------------------------------------ Componentes comunes
 def encabezado(k):
     r = REDES[k]
-    st.markdown(f'<span class="chip" style="background:{es.COLOR[k]}1A; color:{es.COLOR[k]}">{r["tipo"]}</span>',
-                unsafe_allow_html=True)
-    st.markdown(f"## {r['titulo']}")
-    st.markdown(r["problema"])
+    izq, der = st.columns([4, 1.3], gap="large", vertical_alignment="center")
+    with izq:
+        st.markdown(f'<span class="chip" style="background:{es.COLOR[k]}1A; color:{es.COLOR[k]}">{r["tipo"]}</span>',
+                    unsafe_allow_html=True)
+        st.markdown(f"## {r['titulo']}")
+        st.markdown(r["problema"])
+    with der:
+        st.link_button("Abrir cuaderno en Colab ↗", r["colab"])
+        st.caption("Código completo y reproducible")
 
 
 def pestana_entrenar(k):
@@ -144,6 +151,7 @@ def pestana_entrenar(k):
     with izq:
         st.markdown("##### Datos")
         st.markdown(f"[{r['dataset']}]({r['url']}) — se descargan automáticamente al entrenar.")
+        st.markdown(f"Código reproducible: [cuaderno de Google Colab]({r['colab']})")
         st.markdown("##### Arquitectura y parámetros ajustados")
         st.markdown(f"**{r['red']}**")
         tabla_simple(PARAMETROS[k], "Parámetro", "Valor", "Configuración de la red")
@@ -182,15 +190,14 @@ def entrenar(k):
 
 
 def sin_entrenar():
-    st.warning("Primero entrena la red en la pestaña **① Entrenar**.")
+    st.warning("Primero entrena la red en la pestaña **Entrenar**.")
 
 
-def curvas(ax_perdida, ax_metrica, h, metrica, nombre):
-    ax_perdida.plot(h["loss"], label="Entrenamiento"); ax_perdida.plot(h["val_loss"], label="Validación")
-    ax_perdida.set(title="Error de entrenamiento", xlabel="Época", ylabel="Pérdida"); ax_perdida.legend()
-    if ax_metrica is not None:
-        ax_metrica.plot(h[metrica], label="Entrenamiento"); ax_metrica.plot(h[f"val_{metrica}"], label="Validación")
-        ax_metrica.set(title=f"{nombre} por época", xlabel="Época", ylabel=nombre); ax_metrica.legend()
+def graficas(*charts):
+    """Muestra gráficas interactivas lado a lado."""
+    for col, ch in zip(st.columns(len(charts), gap="medium"), charts):
+        with col:
+            st.altair_chart(ch, use_container_width=True)
 
 
 def historial(clave, columnas_formato, titulo, colorear=None):
@@ -214,6 +221,18 @@ EJ1 = {"Operación normal": ("M", 298.1, 308.6, 1551, 42.8, 0),
 CAMPOS1 = ["p1_tipo", "p1_ta", "p1_tp", "p1_rpm", "p1_tq", "p1_dw"]
 
 
+ALERTA = 0.5      # A partir de aquí se recomienda revisar la máquina aunque no llegue al umbral de falla
+
+
+def nivel_riesgo(p, umbral):
+    """Nivel de riesgo: (diagnóstico, tono de la tarjeta, acción recomendada, color de la barra)."""
+    if p >= umbral:
+        return "FALLA", "rojo", "detener la máquina y darle mantenimiento", "#B42318"
+    if p >= min(ALERTA, umbral):
+        return "REVISAR", "amarillo", "riesgo moderado: programar una inspección preventiva", "#DC6803"
+    return "SIN FALLA", "verde", "la máquina puede operar con normalidad", "#067647"
+
+
 def cargar_ej1():
     if st.session_state.ej1 in EJ1:
         for c, v in zip(CAMPOS1, EJ1[st.session_state.ej1]):
@@ -222,7 +241,7 @@ def cargar_ej1():
 
 def red_1():
     encabezado(1)
-    t1, t2, t3 = st.tabs(["① Entrenar", "② Resultados", "③ Probar la red"])
+    t1, t2, t3 = st.tabs(["Entrenar", "Resultados", "Probar la red"])
     with t1:
         pestana_entrenar(1)
     res = modelo(1)
@@ -252,11 +271,14 @@ def red_1():
             with b:
                 mostrar(es.tabla(matriz, "Matriz de confusión")
                         .apply(es.colores_matriz, axis=None, subset=list(matriz.columns[1:])))
-            fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
-            curvas(ax[0], ax[1], res["historial"], "auc", "AUC")
-            RocCurveDisplay.from_predictions(res["y_ev"], res["p_ev"], ax=ax[2], name="Red neuronal")
-            ax[2].set_title("Curva ROC")
-            plt.tight_layout(); st.pyplot(fig); plt.close(fig)
+            st.markdown("##### Gráficas")
+            st.caption("Pasa el cursor sobre las gráficas para ver los valores; usa la rueda del mouse para hacer zoom "
+                       "y haz clic en la leyenda para resaltar una curva.")
+            graficas(gr.curvas(res["historial"], "loss", "Pérdida", es.COLOR[1]),
+                     gr.curvas(res["historial"], "auc", "AUC", es.COLOR[1]))
+            graficas(gr.roc(res["y_ev"], res["p_ev"], res["auc"], es.COLOR[1]),
+                     gr.histograma(res["p_ev"][res["y_ev"] == 1], "Probabilidad asignada", "#B42318",
+                                   "Probabilidad que dio la red a las fallas reales"))
             st.markdown(f"La red detectó **{mc[1, 1]} de {mc[1].sum()} fallas reales** con **{mc[0, 1]} falsas "
                         f"alarmas** entre {mc[0].sum()} máquinas sanas. Las curvas de entrenamiento y validación "
                         "avanzan juntas, por lo que no hay sobreajuste.")
@@ -285,18 +307,31 @@ def red_1():
             st.session_state.setdefault("hist1", []).append(
                 {"Máquina": f"Prueba {len(st.session_state.get('hist1', [])) + 1}", "Tipo": tipo,
                  "Aire (K)": ta, "Proceso (K)": tp, "rpm": rpm, "Torque (Nm)": tq, "Desgaste (min)": dw,
-                 "Prob. de falla": p, "Diagnóstico": "FALLA" if p >= res["umbral"] else "SIN FALLA"})
+                 "Prob. de falla": p, "Diagnóstico": nivel_riesgo(p, res["umbral"])[0]})
         if st.session_state.get("hist1"):
             u = st.session_state["hist1"][-1]
-            falla = u["Diagnóstico"] == "FALLA"
-            st.markdown(es.veredicto("Diagnóstico de la red", u["Diagnóstico"],
-                                     f"Probabilidad de falla: <b>{u['Prob. de falla']:.1%}</b> · la red indica falla "
-                                     f"a partir de {res['umbral']:.0%} (marca negra)", "rojo" if falla else "verde")
-                        + es.barra(u["Prob. de falla"], res["umbral"], "#B42318" if falla else "#067647"),
+            nivel, tono, accion, color = nivel_riesgo(u["Prob. de falla"], res["umbral"])
+            st.markdown(es.veredicto("Diagnóstico de la red", nivel,
+                                     f"Probabilidad de falla: <b>{u['Prob. de falla']:.1%}</b> · {accion}", tono)
+                        + es.barra(u["Prob. de falla"], [ALERTA, res["umbral"]], color), unsafe_allow_html=True)
+            st.markdown(f"<span class='nota'>Marcas de la barra: {ALERTA:.0%} = inicio de riesgo moderado · "
+                        f"{res['umbral']:.0%} = umbral de falla calculado por el algoritmo.</span>",
                         unsafe_allow_html=True)
+        with st.expander("¿Cómo se interpreta la probabilidad de falla?"):
+            st.markdown(
+                f"- **SIN FALLA** (menos de {ALERTA:.0%}): la máquina puede seguir operando con normalidad.\n"
+                f"- **REVISAR** ({ALERTA:.0%} a {res['umbral']:.0%}): hay señales de riesgo; conviene programar una "
+                "inspección preventiva, aunque la red todavía no la clasifica como falla.\n"
+                f"- **FALLA** ({res['umbral']:.0%} o más): la red predice una falla; se recomienda detener la máquina y "
+                "darle mantenimiento.\n\n"
+                f"El umbral de falla ({res['umbral']:.0%}) no se eligió a mano: el algoritmo probó varios valores con los "
+                "datos de validación y se quedó con el que da el mejor equilibrio entre detectar fallas y evitar falsas "
+                "alarmas (máximo F1). Es alto porque durante el entrenamiento se dio más peso a las fallas (son solo el "
+                "3 % de los datos), lo que hace que la red asigne probabilidades altas con facilidad; por eso un 80 % "
+                "no equivale a un 80 % de probabilidad real de falla, sino a una señal de riesgo que merece revisión.")
         historial("hist1", {"Prob. de falla": "{:.1%}", "Aire (K)": "{:.1f}", "Proceso (K)": "{:.1f}",
                             "Torque (Nm)": "{:.1f}"}, "Máquinas diagnosticadas",
-                  ("Diagnóstico", lambda v: es.ROJO if v == "FALLA" else es.VERDE))
+                  ("Diagnóstico", lambda v: es.ROJO if v == "FALLA" else es.AMARILLO if v == "REVISAR" else es.VERDE))
 
 
 # ------------------------------------------------------------------ 2. Regresión
@@ -313,7 +348,7 @@ def cargar_ej2():
 
 def red_2():
     encabezado(2)
-    t1, t2, t3 = st.tabs(["① Entrenar", "② Resultados", "③ Probar la red"])
+    t1, t2, t3 = st.tabs(["Entrenar", "Resultados", "Probar la red"])
     with t1:
         pestana_entrenar(2)
     res = modelo(2)
@@ -341,17 +376,13 @@ def red_2():
                         .format("{:.2f}", subset=["Real (MW)", "Predicho (MW)", "Error (MW)"])
                         .map(lambda e: es.VERDE if abs(e) < 3 else es.AMARILLO if abs(e) < 6 else es.ROJO,
                              subset=["Error (MW)"]))
-            fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
-            curvas(ax[0], None, res["historial"], None, None); ax[0].set_yscale("log")
-            lim = [min(y_ev.min(), p_ev.min()) - 5, max(y_ev.max(), p_ev.max()) + 5]
-            ax[1].scatter(y_ev, p_ev, s=8, alpha=0.45, color=es.COLOR[2])
-            ax[1].plot(lim, lim, "k--", lw=1, label="Ajuste perfecto")
-            ax[1].set(title=f"Real vs. predicho (R² = {res['r2']:.3f})", xlabel="Real (MW)", ylabel="Predicho (MW)",
-                      xlim=lim, ylim=lim); ax[1].legend()
-            ax[2].hist(p_ev - y_ev, bins=30, color=es.COLOR[2], edgecolor="white")
-            ax[2].axvline(0, color="k", ls="--", lw=1)
-            ax[2].set(title="Distribución de errores", xlabel="Error (MW)", ylabel="Frecuencia")
-            plt.tight_layout(); st.pyplot(fig); plt.close(fig)
+            st.markdown("##### Gráficas")
+            st.caption("Pasa el cursor sobre las gráficas para ver los valores; usa la rueda del mouse para hacer zoom "
+                       "y haz clic en la leyenda para resaltar una curva.")
+            graficas(gr.curvas(res["historial"], "loss", "Pérdida (MSE)", es.COLOR[2]),
+                     gr.dispersion(y_ev, p_ev, es.COLOR[2]))
+            graficas(gr.histograma(p_ev - y_ev, "Error (MW)", es.COLOR[2], "Distribución de errores"),
+                     gr.curvas(res["historial"], "mae", "Error absoluto (normalizado)", es.COLOR[2]))
             st.markdown(f"El error medio equivale a **{res['mae'] / y_ev.mean():.2%}** de la potencia de la planta. "
                         "Entrenamiento, validación y evaluación tienen métricas muy similares, por lo que no hay "
                         "sobreajuste, y los errores se reparten de forma simétrica alrededor de cero.")
@@ -386,13 +417,8 @@ def red_2():
                                          f"{c1:.1f} MW · Alto &gt; {c2:.1f} MW (terciles de los datos históricos)</span>",
                                          tono), unsafe_allow_html=True)
             with der:
-                fig, ax = plt.subplots(figsize=(6, 2.6))
-                ax.hist(res["y_hist"], bins=40, color="#D0D5DD", edgecolor="white")
-                ax.axvspan(res["y_hist"].min(), c1, color="#FEE4E2", alpha=0.6, zorder=0)
-                ax.axvspan(c2, res["y_hist"].max(), color="#DCFAE6", alpha=0.6, zorder=0)
-                ax.axvline(u["Potencia (MW)"], color=es.COLOR[2], lw=2.5, label="Tu estimación")
-                ax.set(title="Tu estimación frente a la producción histórica", xlabel="Potencia (MW)", yticks=[])
-                ax.legend(loc="upper left"); plt.tight_layout(); st.pyplot(fig); plt.close(fig)
+                st.altair_chart(gr.estimacion(res["y_hist"], u["Potencia (MW)"], res["cortes"], es.COLOR[2]),
+                                use_container_width=True)
         historial("hist2", {"Potencia (MW)": "{:.1f}", "Temp. (°C)": "{:.1f}", "Vacío (cm Hg)": "{:.1f}",
                             "Presión (mbar)": "{:.1f}", "Humedad (%)": "{:.1f}"}, "Escenarios estimados",
                   ("Nivel", lambda n: es.VERDE if n == "Alto" else es.AMARILLO if n == "Medio" else es.ROJO))
@@ -406,7 +432,7 @@ def ciclo_al_azar():
 
 def red_3():
     encabezado(3)
-    t1, t2, t3 = st.tabs(["① Entrenar", "② Resultados", "③ Probar la red"])
+    t1, t2, t3 = st.tabs(["Entrenar", "Resultados", "Probar la red"])
     with t1:
         pestana_entrenar(3)
     res = modelo(3)
@@ -438,13 +464,14 @@ def red_3():
             with b:
                 mostrar(es.tabla(matriz, "Matriz de confusión")
                         .apply(es.colores_matriz, axis=None, subset=list(matriz.columns[1:])))
-            fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
-            curvas(ax[0], ax[1], res["historial"], "accuracy", "Exactitud")
-            for k in range(len(nombres)):
-                ax[2].plot(tiempo, res["ejemplos"][k], lw=1, label=cortos[k])
-            ax[2].set(title="Serie de tiempo: presión PS1 en un ciclo", xlabel="Tiempo (s)", ylabel="Presión (bar)")
-            ax[2].legend(title="Válvula", fontsize=7)
-            plt.tight_layout(); st.pyplot(fig); plt.close(fig)
+            st.markdown("##### Gráficas")
+            st.caption("Pasa el cursor sobre las gráficas para ver los valores; usa la rueda del mouse para hacer zoom "
+                       "y haz clic en la leyenda para resaltar una curva.")
+            graficas(gr.curvas(res["historial"], "loss", "Pérdida", es.COLOR[3]),
+                     gr.curvas(res["historial"], "accuracy", "Exactitud", es.COLOR[3]))
+            st.altair_chart(gr.senales(tiempo, {f"Válvula {c}": res["ejemplos"][k] for k, c in enumerate(cortos)},
+                                       "Presión (bar)", "Serie de tiempo: presión PS1 durante un ciclo de cada estado",
+                                       ["#12B76A", "#2E90FA", "#F79009", "#F04438"]), use_container_width=True)
             st.markdown("La exactitud se mantiene baja durante las primeras épocas y luego sube de golpe cuando la "
                         "red descubre los patrones temporales, un comportamiento típico de las redes LSTM. Entrenamiento "
                         "y validación terminan casi iguales, por lo que no hay sobreajuste.")
@@ -462,12 +489,10 @@ def red_3():
         b.button("🎲 Ciclo al azar", on_click=ciclo_al_azar)
         i = int(np.where(res["c_ev"] == ciclo - 1)[0][0])
         crudo = res["X_ev_crudo"][i]
-        fig, ax = plt.subplots(1, 2, figsize=(13, 2.8))
-        ax[0].plot(tiempo, crudo[:, 0], color=es.COLOR[3], lw=1)
-        ax[0].set(title=f"Ciclo {ciclo}: presión PS1", xlabel="Tiempo (s)", ylabel="bar")
-        ax[1].plot(tiempo, crudo[:, 7], color="#7A5AF8", lw=1)
-        ax[1].set(title=f"Ciclo {ciclo}: flujo FS1", xlabel="Tiempo (s)", ylabel="l/min")
-        plt.tight_layout(); st.pyplot(fig); plt.close(fig)
+        graficas(gr.senales(tiempo, {f"PS{j + 1}": crudo[:, j] for j in range(6)}, "Presión (bar)",
+                            f"Ciclo {ciclo}: presión (6 sensores)"),
+                 gr.senales(tiempo, {"FS1": crudo[:, 7], "FS2": crudo[:, 8]}, "Flujo (l/min)",
+                            f"Ciclo {ciclo}: flujo (2 sensores)", ["#7A5AF8", "#EE46BC"]))
         if st.button("🔍 Diagnosticar ciclo", type="primary"):
             prob = redes.diagnosticar_ciclo(res, i)
             pred, real = int(prob.argmax()), int(res["y_ev"][i])

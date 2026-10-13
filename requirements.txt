@@ -3,6 +3,6 @@ tensorflow-cpu
 scikit-learn
 pandas
 numpy
-matplotlib
+altair>=5
 jinja2
 ucimlrepo
