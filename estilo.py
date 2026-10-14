@@ -35,12 +35,15 @@ h1, h2, h3 {letter-spacing: -0.01em;}
 .barra .lleno {height: 12px; border-radius: 999px;}
 .barra .marca {position: absolute; top: -5px; width: 3px; height: 22px; background: #101828;}
 .nota {font-size: .82rem; color: #667085;}
-.stTabs [data-baseweb="tab-list"] {gap: 6px; background: #EAF0F9; padding: 6px; border-radius: 12px;
-  width: fit-content; margin: 8px 0 18px 0;}
-.stTabs [data-baseweb="tab"] {height: 40px; padding: 0 22px; border-radius: 9px; background: transparent;
-  color: #475467; font-weight: 600;}
-.stTabs [data-baseweb="tab"] p {font-size: 0.95rem; font-weight: 600;}
-.stTabs [aria-selected="true"] {background: #FFFFFF; color: #1F3B73; box-shadow: 0 1px 3px rgba(16,24,40,.14);}
+.stTabs [role="tablist"] {display: flex; gap: 30px; background: transparent; padding: 0; border-radius: 0;
+  border-bottom: 1px solid #DCE3EF; margin: 6px 0 22px 0; width: auto;}
+.stTabs [role="tab"] {background: transparent !important; box-shadow: none !important; border-radius: 0;
+  height: auto; padding: 10px 2px 12px 2px; margin-bottom: -1px; border-bottom: 3px solid transparent;
+  color: #667085; transition: color .15s, border-color .15s;}
+.stTabs [role="tab"] p {font-size: 1rem; font-weight: 600; color: inherit;}
+.stTabs [role="tab"]:hover {color: #1F3B73; border-bottom-color: #B2CCFF;}
+.stTabs [role="tab"][aria-selected="true"] {color: #2E5AA8; border-bottom-color: #2E5AA8;}
+.stTabs [role="tab"]:focus, .stTabs [role="tab"]:focus-visible {outline: none; box-shadow: none !important;}
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {display: none;}
 </style>
 """

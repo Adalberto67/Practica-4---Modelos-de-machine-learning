@@ -142,7 +142,6 @@ def encabezado(k):
         st.markdown(r["problema"])
     with der:
         st.link_button("Abrir cuaderno en Colab ↗", r["colab"])
-        st.caption("Código completo y reproducible")
 
 
 def pestana_entrenar(k):
@@ -151,7 +150,6 @@ def pestana_entrenar(k):
     with izq:
         st.markdown("##### Datos")
         st.markdown(f"[{r['dataset']}]({r['url']}) — se descargan automáticamente al entrenar.")
-        st.markdown(f"Código reproducible: [cuaderno de Google Colab]({r['colab']})")
         st.markdown("##### Arquitectura y parámetros ajustados")
         st.markdown(f"**{r['red']}**")
         tabla_simple(PARAMETROS[k], "Parámetro", "Valor", "Configuración de la red")
@@ -314,9 +312,6 @@ def red_1():
             st.markdown(es.veredicto("Diagnóstico de la red", nivel,
                                      f"Probabilidad de falla: <b>{u['Prob. de falla']:.1%}</b> · {accion}", tono)
                         + es.barra(u["Prob. de falla"], [ALERTA, res["umbral"]], color), unsafe_allow_html=True)
-            st.markdown(f"<span class='nota'>Marcas de la barra: {ALERTA:.0%} = inicio de riesgo moderado · "
-                        f"{res['umbral']:.0%} = umbral de falla calculado por el algoritmo.</span>",
-                        unsafe_allow_html=True)
         with st.expander("¿Cómo se interpreta la probabilidad de falla?"):
             st.markdown(
                 f"- **SIN FALLA** (menos de {ALERTA:.0%}): la máquina puede seguir operando con normalidad.\n"
